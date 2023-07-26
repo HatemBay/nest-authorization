@@ -3,7 +3,10 @@ import { Role } from '../entities/role.enum';
 
 export class CreateUserDto {
   @ApiProperty()
-  name: string;
+  username: string;
+
+  @ApiProperty()
+  password: string;
 
   @ApiProperty()
   role: Role;
