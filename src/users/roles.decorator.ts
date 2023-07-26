@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { Role } from 'src/roles/entities/role.entity';
-import { RoleEnum } from 'src/roles/entities/role.enum';
+import { Role } from './entities/role.enum';
 
-export const Roles = (...roles: RoleEnum[]) => SetMetadata('roles', roles);
+// Added a custom decorator based on SetMetadata that would directly add the role to metadata
+export const Roles = (...roles: Role[]) => SetMetadata('roles', roles);
