@@ -13,11 +13,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from './roles.decorator';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from './roles.guard';
 import { AuthGuard } from '@nestjs/passport';
-import { Role } from 'src/roles/entities/role.entity';
-import { RolesService } from 'src/roles/roles.service';
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Users')
 @Controller('users')
@@ -43,7 +40,6 @@ export class UsersController {
     return this.usersService.findOneById(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('username/:username')
   findOneByUsername(@Param('username') username: string) {
     return this.usersService.findOneByUsername(username);

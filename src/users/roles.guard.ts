@@ -1,14 +1,12 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AuthGuard } from '@nestjs/passport';
-import { Role } from 'src/roles/entities/role.entity';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    //extracting require roles
+    // extracting required roles (reflector reads metadata)
     const requiredRoles = this.reflector.getAllAndOverride<string[]>('roles', [
       context.getHandler(),
       context.getClass(),
@@ -19,7 +17,7 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    // extracting user's payload
+    // extracting user from http request
     const { user } = context.switchToHttp().getRequest();
 
     const roleNames: string[] = [];

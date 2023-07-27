@@ -1,5 +1,4 @@
 import { SetMetadata } from '@nestjs/common';
-import { Role } from 'src/roles/entities/role.entity';
 
 // Added a custom decorator based on SetMetadata that would directly add the role (or many roles directly) to metadata
 // export const Roles = (...roles: Role[]) => {
@@ -9,4 +8,6 @@ import { Role } from 'src/roles/entities/role.entity';
 //   return SetMetadata('roles', roleNames);
 // };
 
+// *Nb: The reason I didn't make role an enum is because sqlite is preventing me from accessing the array of string that represents roles in a user
+// *so I can't retrieve it from my current user or put it in my payload, guess it's better to make a more scalable role display anyway
 export const Roles = (...roles: string[]) => SetMetadata('roles', roles);

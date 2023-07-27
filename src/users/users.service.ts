@@ -4,21 +4,12 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RolesService } from 'src/roles/roles.service';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private usersRepository: Repository<User>, // private readonly rolesService: RolesService,
+    @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
-
-  // async getRoles(): Promise<string[]> {
-  //   let roles: string[];
-  //   (await this.rolesService.findAll()).forEach((data) =>
-  //     roles.push(data.name),
-  //   );
-  //   return roles;
-  // }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.usersRepository.create(createUserDto);
@@ -58,6 +49,9 @@ export class UsersService {
       ({ username: user.username } = updateUserDto);
     }
     return await this.usersRepository.save(user);
+
+    // *Untested alternative (I'm lazy :,c)
+    // return await this.usersRepository.save({...user, ...updateUserDto});
   }
 
   async remove(id: number): Promise<User> {

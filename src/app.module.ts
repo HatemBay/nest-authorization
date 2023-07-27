@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import config from '../ormconfig';
-import { RolesGuard } from './users/roles.guard';
 import { AuthModule } from './auth/auth.module';
 import { RolesModule } from './roles/roles.module';
 
@@ -18,6 +17,8 @@ import { RolesModule } from './roles/roles.module';
   controllers: [AppController],
   providers: [
     AppService,
+    // *Making the RolesGuard global makes it that i can't read user's payload from http with ExecutionContext
+    // *So I'll have to use the useGuards decorator in each controller
     // {
     //   provide: 'APP_GUARD',
     //   useClass: RolesGuard,
