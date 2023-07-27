@@ -31,8 +31,4 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
-
-  slmslm() {
-    console.log('lqskjlkqds');
-  }
 }

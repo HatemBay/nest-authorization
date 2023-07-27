@@ -5,8 +5,6 @@ import { Role } from 'src/roles/entities/role.entity';
 // export const Roles = (...roles: Role[]) => {
 //   const roleNames: string[] = [];
 //   roles.forEach((role) => roleNames.push(role.name));
-//   console.log('roleNames');
-//   console.log(roleNames);
 
 //   return SetMetadata('roles', roleNames);
 // };

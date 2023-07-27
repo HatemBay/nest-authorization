@@ -18,7 +18,7 @@ import { RolesGuard } from './roles.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { Role } from 'src/roles/entities/role.entity';
 import { RolesService } from 'src/roles/roles.service';
-// @UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
@@ -31,16 +31,12 @@ export class UsersController {
     return await this.usersService.create(createUserDto);
   }
 
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'USER')
   @Get()
   findAll() {
-    console.log(this.roles);
-
     return this.usersService.findAll();
   }
 
-  // @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles()
   @Get('id/:id')
   findOneById(@Param('id') id: string) {
