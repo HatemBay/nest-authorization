@@ -14,6 +14,7 @@
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This project aims to demonstrate how to implement role-based authorization in a NestJS application. It provides a foundation for building applications with user roles, such as "admin," "moderator," and "user," and restricts access to certain routes based on these roles.
 
 ## Installation
 
