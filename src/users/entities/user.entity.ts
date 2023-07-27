@@ -1,5 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { Role } from './role.enum';
+import { Role } from 'src/roles/entities/role.entity';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -12,10 +18,11 @@ export class User {
   @Column()
   password: string;
 
-  @Column()
-  role: Role;
-
-  // @ManyToMany(() => Role, (role) => role.users)
-  // @JoinTable()
+  // @Column('text', { array: true })
+  // // @Column()
   // roles: Role[];
+
+  @ManyToMany(() => Role, (role) => role.users)
+  @JoinTable()
+  roles: Role[];
 }

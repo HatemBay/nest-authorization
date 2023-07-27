@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '../entities/role.enum';
+import { Role } from 'src/roles/entities/role.entity';
+import { Column } from 'typeorm';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -8,6 +9,5 @@ export class CreateUserDto {
   @ApiProperty()
   password: string;
 
-  @ApiProperty()
-  role: Role;
+  roles: Role[];
 }

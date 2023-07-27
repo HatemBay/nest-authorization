@@ -12,32 +12,42 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from './roles.decorator';
-import { Role } from './entities/role.enum';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-
+import { RolesGuard } from './roles.guard';
+import { AuthGuard } from '@nestjs/passport';
+import { Role } from 'src/roles/entities/role.entity';
+import { RolesService } from 'src/roles/roles.service';
+// @UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Users')
-@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
+  roles: string[];
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @Roles(Role.ADMIN)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Roles('ADMIN')
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.usersService.create(createUserDto);
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('ADMIN')
   @Get()
   findAll() {
+    console.log(this.roles);
+
     return this.usersService.findAll();
   }
 
+  // @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles()
   @Get('id/:id')
   findOneById(@Param('id') id: string) {
     return this.usersService.findOneById(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('username/:username')
   findOneByUsername(@Param('username') username: string) {
     return this.usersService.findOneByUsername(username);
