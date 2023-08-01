@@ -22,7 +22,7 @@ export class User {
   // // @Column()
   // roles: Role[];
 
-  @ManyToMany(() => Role, (role) => role.users)
-  @JoinTable()
-  roles: Role[];
+  // @ManyToMany(() => Role, (role) => role.users)
+  // @JoinTable()
+  // roles: Role[];
 }

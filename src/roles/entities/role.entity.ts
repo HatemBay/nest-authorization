@@ -9,10 +9,7 @@ export class Role {
   @Column()
   name: string;
 
-  @ManyToMany(() => User, (user) => user.roles)
-  users: User[];
-
-  constructor(name: string) {
-    this.name = name;
-  }
+  // * Refer in the comment in user.entity.ts
+  // @ManyToMany(() => User, (user) => user.roles)
+  // users: User[];
 }
