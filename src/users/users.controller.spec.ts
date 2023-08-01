@@ -4,18 +4,61 @@ import { UsersService } from './users.service';
 
 describe('UsersController', () => {
   let controller: UsersController;
+  const users = [
+    {
+      id: 1,
+      username: 'Hatem',
+      password: '123',
+      roles: [{ name: 'ADMIN' }],
+    },
+    {
+      id: 2,
+      username: 'Chawki',
+      password: '321',
+      roles: [{ name: 'USER' }],
+    },
+    {
+      id: 3,
+      username: '3absi',
+      password: 'messitheGOAT',
+      roles: [{ name: 'USER' }],
+    },
+  ];
 
   const mockUsersService = {
-    create: jest.fn((dto) => {
+    create: jest.fn().mockImplementation((dto) => {
       return {
         id: Date.now(),
         ...dto,
       };
     }),
+    findAll: jest.fn().mockImplementation(() => {
+      return users;
+    }),
+    findOneById: jest.fn().mockImplementation((id) => {
+      return users.filter((user) => user.id === id)[0];
+    }),
+    findOneByUsername: jest.fn().mockImplementation((username) => {
+      return users.filter((user) => user.username === username)[0];
+    }),
+    update: jest.fn().mockImplementation((id, dto) => {
+      return {
+        id,
+        ...dto,
+      };
+    }),
+    remove: jest.fn().mockImplementation((id) => {
+      return users.filter((user) => user.id === id)[0];
+    }),
   };
-  const mockRole = () => ({
-    findAndCountAll: jest.fn(),
-  });
+
+  // const mockUser = () => ({
+  //   findAndCountAll: jest.fn((user) => {
+  //     user.id;
+  //     user.username;
+  //     user.password;
+  //   }),
+  // });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,17 +77,55 @@ describe('UsersController', () => {
   });
 
   it('should create a user', async () => {
-    expect(
-      await controller.create({
-        username: 'Hatem',
-        password: '123',
-        roles: [{ name: 'ADMIN' }],
-      }),
-    ).toEqual({
-      id: expect.any(Number),
+    const dto = {
       username: 'Hatem',
       password: '123',
       roles: [{ name: 'ADMIN' }],
+    };
+
+    expect(await controller.create(dto)).toEqual({
+      id: expect.any(Number),
+      ...dto,
     });
+
+    expect(mockUsersService.create).toHaveBeenCalledWith(dto);
+  });
+
+  it('should get all the users', async () => {
+    expect(await controller.findAll()).toEqual(users);
+
+    expect(mockUsersService.findAll).toHaveBeenCalled();
+  });
+
+  it('should get a user by their id', async () => {
+    expect(await controller.findOneById('1')).toEqual(users[0]);
+
+    expect(mockUsersService.findAll).toHaveBeenCalled();
+  });
+
+  it('should get a user by their name', async () => {
+    expect(await controller.findOneByUsername('Hatem')).toEqual(users[0]);
+
+    expect(mockUsersService.findAll).toHaveBeenCalled();
+  });
+
+  it('should update a user', async () => {
+    const dto = {
+      username: 'Hatem',
+      password: '123',
+      roles: [{ name: 'ADMIN' }],
+    };
+
+    expect(await controller.update('1', dto)).toEqual({
+      id: 1,
+      ...dto,
+    });
+
+    expect(mockUsersService.update).toHaveBeenCalled();
+  });
+  it('should delete a user', async () => {
+    expect(await controller.remove('1')).toEqual(users[0]);
+
+    expect(mockUsersService.remove).toHaveBeenCalled();
   });
 });
