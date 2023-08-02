@@ -10,15 +10,34 @@ describe('UsersController (e2e)', () => {
   let app: INestApplication;
 
   const dto = {
-    id: 1,
     username: 'Hatem',
     password: '123',
     roles: [{ name: 'ADMIN' }],
   };
 
+  const mockUsers = [
+    { id: 1, username: 'Hatem', password: '123', roles: [{ name: 'ADMIN' }] },
+  ];
+
   const mockUsersRepository = {
-    find: jest.fn(),
-    findOneOrFail: jest.fn(),
+    find: jest.fn().mockResolvedValue(mockUsers),
+    findOneOrFail: jest.fn().mockImplementation(async ({ where }) => {
+      const param = where.id || where.username;
+      try {
+        if (param === where.id)
+          return await {
+            id: param,
+            ...dto,
+          };
+        if (param === where.username)
+          return await {
+            username: param,
+            ...dto,
+          };
+      } catch (err) {
+        throw err;
+      }
+    }),
   };
   const mockAuthenticationGuard = {
     // * Here we have intercepted the request using execution context, replacing the old values
@@ -45,11 +64,17 @@ describe('UsersController (e2e)', () => {
     await app.init();
   });
 
-  it('/users (GET)', () => {
-    return request(app.getHttpServer()).get('/users').expect(200);
+  it('/users (GET)', async () => {
+    return await request(app.getHttpServer())
+      .get('/users')
+      .expect(200)
+      .expect(mockUsers);
   });
 
-  it('/users/id/1 (GET)', () => {
-    return request(app.getHttpServer()).get('/users/id/1').expect(200);
+  it('/users/id/1 (GET)', async () => {
+    return await request(app.getHttpServer())
+      .get('/users/id/1')
+      .expect(200)
+      .expect({ id: 1, ...dto });
   });
 });
