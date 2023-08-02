@@ -20,6 +20,10 @@ describe('UsersController (e2e)', () => {
   ];
 
   const mockUsersRepository = {
+    create: jest.fn().mockImplementation((dto) => dto),
+    save: jest
+      .fn()
+      .mockImplementation(async () => await { id: Date.now(), ...dto }),
     find: jest.fn().mockResolvedValue(mockUsers),
     findOneOrFail: jest.fn().mockImplementation(async ({ where }) => {
       const param = where.id || where.username;
@@ -62,6 +66,15 @@ describe('UsersController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+  });
+
+  it('/users (POST)', async () => {
+    return await request(app.getHttpServer())
+      .post('/users')
+      .expect(201)
+      .then((response) => {
+        expect(response.body).toEqual({ id: expect.any(Number), ...dto });
+      });
   });
 
   it('/users (GET)', async () => {
