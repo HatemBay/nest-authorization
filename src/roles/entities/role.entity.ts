@@ -1,4 +1,4 @@
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -10,6 +10,6 @@ export class Role {
   name: string;
 
   // * Refer in the comment in user.entity.ts
-  // @ManyToMany(() => User, (user) => user.roles)
-  // users: User[];
+  @ManyToMany(() => User, (user) => user.roles)
+  users: User[];
 }
