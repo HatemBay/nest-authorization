@@ -4,6 +4,12 @@ import { UsersService } from './users.service';
 
 describe('UsersController', () => {
   let controller: UsersController;
+  const dto = {
+    username: 'Hatem',
+    password: '123',
+    roles: [{ name: 'ADMIN' }],
+  };
+
   const users = [
     {
       id: 1,
@@ -26,8 +32,8 @@ describe('UsersController', () => {
   ];
 
   const mockUsersService = {
-    create: jest.fn().mockImplementation((dto) => {
-      return {
+    create: jest.fn().mockImplementation(async (dto) => {
+      return await {
         id: Date.now(),
         ...dto,
       };
@@ -52,14 +58,6 @@ describe('UsersController', () => {
     }),
   };
 
-  // const mockUser = () => ({
-  //   findAndCountAll: jest.fn((user) => {
-  //     user.id;
-  //     user.username;
-  //     user.password;
-  //   }),
-  // });
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
@@ -77,12 +75,6 @@ describe('UsersController', () => {
   });
 
   it('should create a user', async () => {
-    const dto = {
-      username: 'Hatem',
-      password: '123',
-      roles: [{ name: 'ADMIN' }],
-    };
-
     expect(await controller.create(dto)).toEqual({
       id: expect.any(Number),
       ...dto,
@@ -98,24 +90,24 @@ describe('UsersController', () => {
   });
 
   it('should get a user by their id', async () => {
-    expect(await controller.findOneById('1')).toEqual(users[0]);
+    expect(await controller.findOneById('1')).toEqual({
+      id: 1,
+      ...dto,
+    });
 
-    expect(mockUsersService.findAll).toHaveBeenCalled();
+    expect(mockUsersService.findOneById).toHaveBeenCalled();
   });
 
   it('should get a user by their name', async () => {
-    expect(await controller.findOneByUsername('Hatem')).toEqual(users[0]);
+    expect(await controller.findOneByUsername('Hatem')).toEqual({
+      id: 1,
+      ...dto,
+    });
 
-    expect(mockUsersService.findAll).toHaveBeenCalled();
+    expect(mockUsersService.findOneByUsername).toHaveBeenCalled();
   });
 
   it('should update a user', async () => {
-    const dto = {
-      username: 'Hatem',
-      password: '123',
-      roles: [{ name: 'ADMIN' }],
-    };
-
     expect(await controller.update('1', dto)).toEqual({
       id: 1,
       ...dto,
@@ -123,8 +115,12 @@ describe('UsersController', () => {
 
     expect(mockUsersService.update).toHaveBeenCalled();
   });
+
   it('should delete a user', async () => {
-    expect(await controller.remove('1')).toEqual(users[0]);
+    expect(await controller.remove('1')).toEqual({
+      id: 1,
+      ...dto,
+    });
 
     expect(mockUsersService.remove).toHaveBeenCalled();
   });
