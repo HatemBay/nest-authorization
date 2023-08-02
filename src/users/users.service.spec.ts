@@ -47,6 +47,6 @@ describe('UsersService', () => {
     });
 
     // * Asserting that the create and save methods are called would probably cause problems
-    // * if we use insert from the repository instead of create, so better not assert
+    // * if we used insert from the repository instead of create, so better not assert
   });
 });
