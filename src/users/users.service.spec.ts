@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import * as _ from 'lodash';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -28,22 +29,34 @@ describe('UsersService', () => {
         },
       ];
     }),
-    findOneOrFail: jest.fn().mockImplementation(async ({ where }) => {
-      const param = where.id || where.username;
-      try {
-        return await {
-          param,
-          ...dto,
-        };
-      } catch (err) {
-        throw err;
-      }
-    }),
+    findOneOrFail: jest
+      .fn()
+      .mockImplementation(async ({ where, relations }) => {
+        const param = where.id || where.username;
+        const roles = relations[0];
+        try {
+          if (param === where.id)
+            return await {
+              id: param,
+              username: 'Hatem',
+              password: '123',
+              [roles]: [{ name: 'ADMIN' }],
+            };
+          if (param === where.username)
+            return await {
+              id: 1,
+              username: param,
+              password: '123',
+              [roles]: [{ name: 'ADMIN' }],
+            };
+        } catch (err) {
+          throw err;
+        }
+      }),
     remove: jest.fn().mockImplementation(async (id) => {
-      return await {
-        id,
-        ...dto,
-      };
+      // * Used lodash cloneDeep because dto has an array so spreading will not make an independent copy
+      // * of that array but will make a reference
+      return await _.cloneDeepWith(id, dto);
     }),
   };
 
@@ -84,25 +97,31 @@ describe('UsersService', () => {
     ]);
   });
 
-  it('should find one user by its id', async () => {
-    expect(await service.findOneById(1)).toEqual({
-      id: 1,
-      ...dto,
-    });
-
-    expect(mockUsersRepository.findOneOrFail).toHaveBeenCalledWith({
-      where: { id: 1 },
-    });
-  });
-
   it('should find one user by its username', async () => {
     expect(await service.findOneByUsername('Hatem')).toEqual({
       id: 1,
-      ...dto,
+      username: 'Hatem',
+      password: '123',
+      roles: [{ name: 'ADMIN' }],
     });
 
     expect(mockUsersRepository.findOneOrFail).toHaveBeenCalledWith({
       where: { username: 'Hatem' },
+      relations: ['roles'],
+    });
+  });
+
+  it('should find one user by its id', async () => {
+    expect(await service.findOneById(1)).toEqual({
+      id: 1,
+      username: 'Hatem',
+      password: '123',
+      roles: [{ name: 'ADMIN' }],
+    });
+
+    expect(mockUsersRepository.findOneOrFail).toHaveBeenCalledWith({
+      where: { id: 1 },
+      relations: ['roles'],
     });
   });
 
@@ -112,7 +131,10 @@ describe('UsersService', () => {
       ...dto,
     });
 
-    expect(mockUsersRepository.findOneOrFail).toHaveBeenCalledWith(1);
+    expect(mockUsersRepository.findOneOrFail).toHaveBeenCalledWith({
+      where: { id: 1 },
+      relations: ['roles'],
+    });
     expect(mockUsersRepository.save).toHaveBeenCalled();
   });
 
