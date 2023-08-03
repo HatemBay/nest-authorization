@@ -1,16 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ExecutionContext } from '@nestjs/common';
+import {
+  INestApplication,
+  ExecutionContext,
+  ValidationPipe,
+} from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../src/users/entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 
+// * This test integrates the users controller and service, making the components work together
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
 
-  const dto = {
+  const userDTO = {
     username: 'Hatem',
+    password: '123',
+    roles: [{ name: 'ADMIN' }],
+  };
+
+  const faultyUserDTO = {
+    username: 44645455,
     password: '123',
     roles: [{ name: 'ADMIN' }],
   };
@@ -21,27 +32,38 @@ describe('UsersController (e2e)', () => {
 
   const mockUsersRepository = {
     create: jest.fn().mockImplementation((dto) => dto),
-    save: jest
-      .fn()
-      .mockImplementation(async () => await { id: Date.now(), ...dto }),
+    save: jest.fn().mockImplementation(
+      async (dto) =>
+        await {
+          id: Date.now(),
+          ...dto,
+        },
+    ),
     find: jest.fn().mockResolvedValue(mockUsers),
-    findOneOrFail: jest.fn().mockImplementation(async ({ where }) => {
-      const param = where.id || where.username;
-      try {
-        if (param === where.id)
-          return await {
-            id: param,
-            ...dto,
-          };
-        if (param === where.username)
-          return await {
-            username: param,
-            ...dto,
-          };
-      } catch (err) {
-        throw err;
-      }
-    }),
+    findOneOrFail: jest
+      .fn()
+      .mockImplementation(async ({ where, relations }) => {
+        const param = where.id || where.username;
+        const roles = relations[0];
+        try {
+          if (param === where.id)
+            return await {
+              id: param,
+              username: 'Hatem',
+              password: '123',
+              [roles]: [{ name: 'ADMIN' }],
+            };
+          if (param === where.username)
+            return await {
+              id: 1,
+              username: param,
+              password: '123',
+              [roles]: [{ name: 'ADMIN' }],
+            };
+        } catch (err) {
+          throw err;
+        }
+      }),
   };
   const mockAuthenticationGuard = {
     // * Here we have intercepted the request using execution context, replacing the old values
@@ -49,7 +71,7 @@ describe('UsersController (e2e)', () => {
     // TODO: figure out whether we need to also mock the roles guard or if using the actual guard is fine
     canActivate: jest.fn().mockImplementation((context: ExecutionContext) => {
       const req = context.switchToHttp().getRequest();
-      req.user = dto;
+      req.user = userDTO;
       return true;
     }),
   };
@@ -65,15 +87,34 @@ describe('UsersController (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
+
     await app.init();
   });
 
   it('/users (POST)', async () => {
     return await request(app.getHttpServer())
       .post('/users')
+      .send(userDTO)
+      .expect('Content-Type', /json/)
       .expect(201)
       .then((response) => {
-        expect(response.body).toEqual({ id: expect.any(Number), ...dto });
+        expect(response.body).toEqual({
+          id: expect.any(Number),
+          ...userDTO,
+        });
+      });
+  });
+
+  it('/users (POST) --> 400 on validation error', async () => {
+    return await request(app.getHttpServer())
+      .post('/users')
+      .send(faultyUserDTO)
+      .expect('Content-Type', /json/)
+      .expect(400, {
+        statusCode: 400,
+        message: ['username must be a string'],
+        error: 'Bad Request',
       });
   });
 
@@ -88,6 +129,6 @@ describe('UsersController (e2e)', () => {
     return await request(app.getHttpServer())
       .get('/users/id/1')
       .expect(200)
-      .expect({ id: 1, ...dto });
+      .expect({ id: 1, ...userDTO });
   });
 });
