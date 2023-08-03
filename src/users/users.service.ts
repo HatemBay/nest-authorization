@@ -24,6 +24,7 @@ export class UsersService {
     try {
       const user = await this.usersRepository.findOneOrFail({
         where: { id: id },
+        relations: ['roles'],
       });
       return user;
     } catch (err) {
