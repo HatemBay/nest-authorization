@@ -24,9 +24,7 @@ export class AuthService {
     const payload = {
       username: user.username,
       sub: user.id,
-      // TODO: change back when testing is figured out
-      // roles: user.roles,
-      roles: 'ADMIN',
+      roles: user.roles,
     };
 
     return {
